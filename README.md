@@ -1,6 +1,6 @@
 ## Prerequisites
 
-```
+```bash
 $ sudo apt install gdb valgrind build-essential python3-minimal python-minimal
 $ cd ~
 $ git clone https://github.com/niklasb/gdbinit
@@ -21,7 +21,7 @@ Then, build AFL with qemu mode support and `afl_patches.diff` applied. Set
 
 ## Running
 
-```
+```bash
 $ cd /path/to/bspfuzz
 $ ./run_afl.sh 1
 $ ./run_afl.sh 2
@@ -31,8 +31,9 @@ $ ./run_afl.sh 3
 
 ## Triaging
 
-```
-cd /path/to/bspfuzz/triage
-./triage.sh
-./valgrind.sh
+```bash
+$ sudo sysctl -w kernel.randomize_va_space=0
+$ cd /path/to/bspfuzz/triage
+$ ./triage.sh
+$ ./valgrind.sh
 ```
