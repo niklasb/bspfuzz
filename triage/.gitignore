@@ -1,0 +1,8 @@
+/crashes/*
+!/crashes/.gitkeep
+/bugid/*
+!/bugid/.gitkeep
+/valgrind/*
+!/valgrind/.gitkeep
+__pycache__
+*.pyc

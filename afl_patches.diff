@@ -1,0 +1,109 @@
+diff --git a/afl-fuzz.c b/afl-fuzz.c
+index 01b4afe..082d511 100644
+--- a/afl-fuzz.c
++++ b/afl-fuzz.c
+@@ -3821,7 +3821,7 @@ static void maybe_delete_out_dir(void) {
+ 
+   /* And now, for some finishing touches. */
+ 
+-  fn = alloc_printf("%s/.cur_input", out_dir);
++  fn = alloc_printf("%s/cur_input.bsp", out_dir);
+   if (unlink(fn) && errno != ENOENT) goto dir_cleanup_failed;
+   ck_free(fn);
+ 
+@@ -7204,7 +7204,7 @@ EXP_ST void setup_dirs_fds(void) {
+ 
+ EXP_ST void setup_stdio_file(void) {
+ 
+-  u8* fn = alloc_printf("%s/.cur_input", out_dir);
++  u8* fn = alloc_printf("%s/cur_input.bsp", out_dir);
+ 
+   unlink(fn); /* Ignore errors */
+ 
+@@ -7526,7 +7526,7 @@ EXP_ST void detect_file_args(char** argv) {
+       /* If we don't have a file name chosen yet, use a safe default. */
+ 
+       if (!out_file)
+-        out_file = alloc_printf("%s/.cur_input", out_dir);
++        out_file = alloc_printf("%s/cur_input.bsp", out_dir);
+ 
+       /* Be sure that we're always using fully-qualified paths. */
+ 
+diff --git a/config.h b/config.h
+index e74b3b3..84f8f5b 100644
+--- a/config.h
++++ b/config.h
+@@ -139,11 +139,11 @@
+ 
+ /* Maximum size of input file, in bytes (keep under 100MB): */
+ 
+-#define MAX_FILE            (1 * 1024 * 1024)
++#define MAX_FILE            (100 * 1024 * 1024)
+ 
+ /* The same, for the test case minimizer: */
+ 
+-#define TMIN_MAX_FILE       (10 * 1024 * 1024)
++#define TMIN_MAX_FILE       (100 * 1024 * 1024)
+ 
+ /* Block normalization steps for afl-tmin: */
+ 
+@@ -294,7 +294,7 @@
+ /* Fork server init timeout multiplier: we'll wait the user-selected
+    timeout plus this much for the fork server to spin up. */
+ 
+-#define FORK_WAIT_MULT      10
++#define FORK_WAIT_MULT      1000
+ 
+ /* Calibration timeout adjustments, to be a bit more generous when resuming
+    fuzzing sessions or trying to calibrate already-added internal finds.
+diff --git a/qemu_mode/build_qemu_support.sh b/qemu_mode/build_qemu_support.sh
+index 827c93d..fe454b1 100755
+--- a/qemu_mode/build_qemu_support.sh
++++ b/qemu_mode/build_qemu_support.sh
+@@ -145,7 +145,7 @@ echo "[+] Configuration complete."
+ 
+ echo "[*] Attempting to build QEMU (fingers crossed!)..."
+ 
+-make || exit 1
++make -j12 || exit 1
+ 
+ echo "[+] Build process successful!"
+ 
+@@ -164,7 +164,7 @@ if [ "$ORIG_CPU_TARGET" = "" ]; then
+ 
+   cd ..
+ 
+-  make >/dev/null || exit 1
++  make -j12 >/dev/null || exit 1
+ 
+   gcc test-instr.c -o test-instr || exit 1
+ 
+diff --git a/qemu_mode/patches/afl-qemu-cpu-inl.h b/qemu_mode/patches/afl-qemu-cpu-inl.h
+index 8d3133a..bfc39d0 100644
+--- a/qemu_mode/patches/afl-qemu-cpu-inl.h
++++ b/qemu_mode/patches/afl-qemu-cpu-inl.h
+@@ -48,6 +48,7 @@
+ 
+ #define AFL_QEMU_CPU_SNIPPET2 do { \
+     if(itb->pc == afl_entry_point) { \
++      fprintf(stderr, "STARTING FORK SERVER\n"); \
+       afl_setup(); \
+       afl_forkserver(cpu); \
+     } \
+diff --git a/qemu_mode/qemu-2.10.0/linux-user/elfload.c b/qemu_mode/qemu-2.10.0/linux-user/elfload.c
+index 7906288..6d8ffc6 100644
+--- a/qemu_mode/qemu-2.10.0/linux-user/elfload.c
++++ b/qemu_mode/qemu-2.10.0/linux-user/elfload.c
+@@ -2085,6 +2085,12 @@ static void load_elf_image(const char *image_name, int image_fd,
+     info->brk = 0;
+     info->elf_flags = ehdr->e_flags;
+ 
++    const char* entry = getenv("AFL_ENTRY_POINT");
++    if (entry) {
++        afl_entry_point = strtol(entry, NULL, 16);
++    }
++    if (!afl_entry_point) afl_entry_point = info->entry;
++
+     for (i = 0; i < ehdr->e_phnum; i++) {
+         struct elf_phdr *eppnt = phdr + i;
+         if (eppnt->p_type == PT_LOAD) {
