@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import shutil
 import struct
 import os

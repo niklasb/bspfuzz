@@ -1,7 +1,7 @@
 ## Prerequisites
 
 ```
-$ sudo apt install gdb valgrind build-essential python3-minimal
+$ sudo apt install gdb valgrind build-essential python3-minimal python-minimal
 $ cd ~
 $ git clone https://github.com/niklasb/gdbinit
 $ cd gdbinit
