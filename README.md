@@ -1,3 +1,7 @@
+Author: [@_niklasb](https://github.com/_niklasb)
+
+[Overview article.](https://phoenhex.re/2018-08-26/csgo-fuzzing-bsp)
+
 ## Prerequisites
 
 ```bash
