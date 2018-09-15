@@ -81,6 +81,7 @@ int main(int argc, char** argv) {
 
     // engine
     ptr(CModelLoader_GetModelForName, engine, 0x180460);
+    ptr(p_modelloader, engine, 0x6E3C80);
 
     const char* args[] = {"x", "-game", "csgo", "-nominidumps", "-nobreakpad"};
     DedicatedMain(sizeof args / sizeof *args, args);
