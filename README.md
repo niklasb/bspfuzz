@@ -31,6 +31,7 @@ Then, build AFL with qemu mode support and `afl_patches.diff` applied. Set
 
 ```bash
 $ cd /path/to/bspfuzz
+$ export LD_LIBRARY_PATH=./bin:./csgo:{$LD_LIBRARY_PATH}
 $ ./run_afl.sh 1
 $ ./run_afl.sh 2
 $ ./run_afl.sh 3
