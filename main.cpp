@@ -57,11 +57,17 @@ int main(int argc, char** argv) {
     }
 
     struct link_map *lm = (struct link_map*)dlopen("dedicated.so", RTLD_NOW);
+    if(lm == NULL){
+    	
+    	fprintf(stderr, dlerror());
+    
+    }
     void* dedicated = (void*)lm->l_addr;
     assert(dedicated);
     lm = (struct link_map*)dlopen("engine.so", RTLD_NOW);
     void* engine = (void*)lm->l_addr;
     assert(engine);
+    
 
     cout << "dedicated.so loaded at " << dedicated << endl;
     cout << "engine.so loaded at " << engine << endl;
